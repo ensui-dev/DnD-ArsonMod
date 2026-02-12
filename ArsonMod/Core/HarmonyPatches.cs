@@ -219,7 +219,6 @@ namespace ArsonMod.Core
                     if (fireManager != null && roomId != null && fireManager.GetRoomState(roomId) == Fire.FireManager.RoomFireState.Burning)
                     {
                         FileLogger.Log($"Patch6: Extinguisher used in burning room: {roomId}");
-                        MelonLogger.Msg($"[ArsonMod] Extinguisher used in burning room: {roomId}");
                     }
                 }
                 catch (System.Exception ex) { FileLogger.Error("Patch6: ExtinguisherUse crashed", ex); }
@@ -273,7 +272,7 @@ namespace ArsonMod.Core
                         if (UI.ArsonLobbyUI.IsArsonTaskEnabled(nextTaskIdx))
                         {
                             // Notification is shown by ArsonTaskInjector when it resolves
-                            MelonLogger.Msg($"[ArsonMod] Task assignment detected, requesting arson task injection idx={nextTaskIdx}");
+                            FileLogger.Log($"Patch8: Task assignment detected, requesting injection idx={nextTaskIdx}");
                             Tasks.ArsonTaskInjector.RequestInjection();
                         }
                     }
@@ -340,7 +339,6 @@ namespace ArsonMod.Core
                     {
                         ArsonistHasLitCigarette = true;
                         FileLogger.Log("Patch10: Arsonist lit cigarette");
-                        MelonLogger.Msg("[ArsonMod] Arsonist has lit a cigarette.");
                     }
                 }
                 catch (System.Exception ex) { FileLogger.Error("Patch10: CigaretteSmoke crashed", ex); }

@@ -128,7 +128,6 @@ namespace ArsonMod.Tasks
                 if (!_loggedFirstFrame)
                 {
                     _loggedFirstFrame = true;
-                    MelonLogger.Msg("[ArsonMod] Fire alarm interaction running from OnUpdate (active)");
                     Core.FileLogger.Log("FireAlarmInteraction: First frame reached");
                 }
 
@@ -198,8 +197,7 @@ namespace ArsonMod.Tasks
                 ctrl.loadingBar.SetProgress(0f);
             }
 
-            Core.FileLogger.Log($"FireAlarm: Interaction started (duration={_fireAlarmDuration}s)");
-            MelonLogger.Msg($"[ArsonMod] Started fire alarm interaction: {taskDef.ArsonistTaskName}");
+            Core.FileLogger.Log($"FireAlarm: Interaction started (duration={_fireAlarmDuration}s): {taskDef.ArsonistTaskName}");
         }
 
         private static void UpdateActiveFireAlarmInteraction(float deltaTime)
@@ -407,7 +405,6 @@ namespace ArsonMod.Tasks
                 _injectedInteractable = interactable;
 
                 Core.FileLogger.Log($"InjectAlternative: Added '{taskDef.ArsonistTaskName}' to {interactable.gameObject.name} (duration={taskDef.AnimationDuration}s)");
-                MelonLogger.Msg($"[ArsonMod] Injected arson alternative into {interactable.gameObject.name}");
             }
             catch (System.Exception ex)
             {
@@ -709,7 +706,6 @@ namespace ArsonMod.Tasks
                     // UpdateFireAlarmInteraction() runs every frame from OnUpdate and handles
                     // raycast detection, UI injection, and loading bar
                     Core.FileLogger.Log($"Resolve: Fire alarm path — OnUpdate will handle interaction for '{taskDef.ArsonistTaskName}' on {targetObj.name}");
-                    MelonLogger.Msg($"[ArsonMod] Fire alarm task: OnUpdate interaction handler active");
                 }
             }
 
@@ -720,7 +716,6 @@ namespace ArsonMod.Tasks
             // Task is shown persistently in the HUD list via Patch 11 — no popup needed
 
             Core.FileLogger.Log($"Resolve: task '{CurrentArsonTaskName}' now active, target={targetObj?.name ?? "null"}");
-            MelonLogger.Msg($"[ArsonMod] Arson task activated: {CurrentArsonTaskName}");
         }
 
         // =================================================================
@@ -788,7 +783,6 @@ namespace ArsonMod.Tasks
                 _loggedFirstMarkerFrame = false;
 
                 Core.FileLogger.Log($"ShowTaskMarker: Created marker '{label}' on {target.name}");
-                MelonLogger.Msg($"[ArsonMod] Location marker shown: {label}");
             }
             catch (System.Exception ex)
             {
@@ -843,7 +837,7 @@ namespace ArsonMod.Tasks
                 if (!_loggedFirstMarkerFrame)
                 {
                     _loggedFirstMarkerFrame = true;
-                    MelonLogger.Msg($"[ArsonMod] Marker positioning active: target={(target != null ? target.name : "null")}");
+                    Core.FileLogger.Log($"Marker positioning active: target={(target != null ? target.name : "null")}");
                 }
 
                 if (target == null) return;
@@ -929,11 +923,11 @@ namespace ArsonMod.Tasks
                     var alarms = Object.FindObjectsOfType<FireAlarmController>();
                     if (alarms != null && alarms.Count > 0)
                     {
-                        // Log all available alarms for diagnostics
+                        // Log all available alarms to file for diagnostics
                         for (int i = 0; i < alarms.Count; i++)
                         {
                             string alarmRoom = Core.PlayerAccess.GetRoomForPosition(alarms[i].transform.position);
-                            MelonLogger.Msg($"[ArsonMod] FireAlarm[{i}]: '{alarms[i].gameObject.name}' in room '{alarmRoom}' at {alarms[i].transform.position}");
+                            Core.FileLogger.Log($"FireAlarm[{i}]: '{alarms[i].gameObject.name}' in room '{alarmRoom}' at {alarms[i].transform.position}");
                         }
 
                         if (_selectedAlarmIndex < 0 || _selectedAlarmIndex >= alarms.Count)
@@ -944,7 +938,6 @@ namespace ArsonMod.Tasks
                             int hash = System.Guid.NewGuid().GetHashCode();
                             _selectedAlarmIndex = ((hash % alarms.Count) + alarms.Count) % alarms.Count;
                             string selectedRoom = Core.PlayerAccess.GetRoomForPosition(alarms[_selectedAlarmIndex].transform.position);
-                            MelonLogger.Msg($"[ArsonMod] Selected fire alarm {_selectedAlarmIndex}/{alarms.Count} (hash={hash}): '{alarms[_selectedAlarmIndex].gameObject.name}' in room '{selectedRoom}'");
                             Core.FileLogger.Log($"FindTarget: Selected alarm index {_selectedAlarmIndex} of {alarms.Count} (hash={hash}) in room '{selectedRoom}'");
                         }
                         return alarms[_selectedAlarmIndex].gameObject;
@@ -1006,45 +999,27 @@ namespace ArsonMod.Tasks
 
         private static void LogSceneObjectDiscovery()
         {
-            MelonLogger.Msg("[ArsonMod] === Scene Object Discovery ===");
-
             var rooms = Object.FindObjectsOfType<RoomTrigger>();
+            var shelves = Object.FindObjectsOfType<Il2CppProps.Shelf.ShelfController>();
+            var printer = Il2CppProps.Printer.Printer.instance;
+            var bins = Object.FindObjectsOfType<Il2CppProps.TrashBin.TrashBin>();
+            var alarms = Object.FindObjectsOfType<FireAlarmController>();
+
+            MelonLogger.Msg($"[ArsonMod] Scene: {rooms?.Count ?? 0} rooms, {bins?.Count ?? 0} bins, {alarms?.Count ?? 0} alarms, printer={(printer != null ? "yes" : "no")}");
+
+            // Detailed per-object info goes to file log only
+            Core.FileLogger.Log("=== Scene Object Discovery ===");
             if (rooms != null)
-            {
-                MelonLogger.Msg($"[ArsonMod] RoomTriggers: {rooms.Count}");
                 foreach (var room in rooms)
                     if (room?.currentRoom != null)
-                        MelonLogger.Msg($"[ArsonMod]   Room: '{room.currentRoom.roomName}' at {room.transform.position}");
-            }
-
-            var shelves = Object.FindObjectsOfType<Il2CppProps.Shelf.ShelfController>();
-            if (shelves != null && shelves.Count > 0)
-            {
-                MelonLogger.Msg($"[ArsonMod] ShelfControllers: {shelves.Count}");
-                foreach (var shelf in shelves)
-                    MelonLogger.Msg($"[ArsonMod]   Shelf: '{shelf.gameObject.name}' at {shelf.transform.position}");
-            }
-
-            var printer = Il2CppProps.Printer.Printer.instance;
-            MelonLogger.Msg($"[ArsonMod] Printer.instance: {(printer != null ? printer.gameObject.name : "null")}");
-
-            var bins = Object.FindObjectsOfType<Il2CppProps.TrashBin.TrashBin>();
+                        Core.FileLogger.Log($"  Room: '{room.currentRoom.roomName}' at {room.transform.position}");
             if (bins != null)
-            {
-                MelonLogger.Msg($"[ArsonMod] TrashBins: {bins.Count}");
                 foreach (var bin in bins)
-                    MelonLogger.Msg($"[ArsonMod]   TrashBin: '{bin.gameObject.name}' at {bin.transform.position}");
-            }
-
-            var alarms = Object.FindObjectsOfType<FireAlarmController>();
-            if (alarms != null && alarms.Count > 0)
-            {
-                MelonLogger.Msg($"[ArsonMod] FireAlarmControllers: {alarms.Count}");
+                    Core.FileLogger.Log($"  TrashBin: '{bin.gameObject.name}' at {bin.transform.position}");
+            if (alarms != null)
                 foreach (var alarm in alarms)
-                    MelonLogger.Msg($"[ArsonMod]   FireAlarm: '{alarm.gameObject.name}' at {alarm.transform.position}");
-            }
-
-            MelonLogger.Msg("[ArsonMod] === End Scene Object Discovery ===");
+                    Core.FileLogger.Log($"  FireAlarm: '{alarm.gameObject.name}' at {alarm.transform.position}");
+            Core.FileLogger.Log("=== End Scene Object Discovery ===");
         }
 
         private static void ResetFireAlarmInteraction()

@@ -62,7 +62,7 @@ namespace ArsonMod.Core
         {
             // Process locally — the underlying game state is already network-synced
             // through Mirror RPCs on TrashBin, GameManager, etc.
-            MelonLogger.Msg($"[ArsonMod Net] {type}: {payload}");
+            FileLogger.Log($"Net: {type}: {payload}");
             OnMessageReceived(type, payload);
         }
 

@@ -111,8 +111,6 @@ ArsonMod/
     FireNotifications.cs   # Alerts, banners, clue popups
   Items/
     FireExtinguisher.cs    # Extinguisher pickup/usage
-  Assets/
-    README_ASSETS.md       # Asset bundle guide
 
 ArsonMod.csproj            # Build project
 ```

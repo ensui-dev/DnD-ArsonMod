@@ -50,10 +50,10 @@ namespace ArsonMod.Fire
                 AddEdge(roomA, roomB);
             }
 
-            MelonLogger.Msg($"[ArsonMod] Room adjacency graph built: {_adjacency.Count} rooms discovered.");
+            MelonLogger.Msg($"[ArsonMod] Room adjacency: {_adjacency.Count} rooms discovered.");
             foreach (var kvp in _adjacency)
             {
-                MelonLogger.Msg($"[ArsonMod]   {kvp.Key} -> [{string.Join(", ", kvp.Value)}]");
+                Core.FileLogger.Log($"  {kvp.Key} -> [{string.Join(", ", kvp.Value)}]");
             }
         }
 

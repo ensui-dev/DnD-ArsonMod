@@ -79,7 +79,7 @@ namespace ArsonMod.UI
                         }
                     }
                     string subCatStr = subCats.Count > 0 ? string.Join(", ", subCats) : "(none)";
-                    MelonLogger.Msg($"[ArsonMod] Category[{i}]: '{cat.CategoryName}' ({settingCount} settings, subcats: {subCatStr})");
+                    Core.FileLogger.Log($"Category[{i}]: '{cat.CategoryName}' ({settingCount} settings, subcats: {subCatStr})");
                 }
             }
 

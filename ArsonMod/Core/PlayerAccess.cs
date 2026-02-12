@@ -107,31 +107,36 @@ namespace ArsonMod.Core
 
         private static void LogPlayerDiagnostics(GameManager gm)
         {
-            MelonLogger.Msg("[ArsonMod] === Player Discovery Diagnostics ===");
-            MelonLogger.Msg($"[ArsonMod] GameManager.instance: {(gm != null ? "exists" : "NULL")}");
+            FileLogger.Log("=== Player Discovery Diagnostics ===");
+            FileLogger.Log($"GameManager.instance: {(gm != null ? "exists" : "NULL")}");
 
+            int wsCount = 0;
+            int occupiedCount = 0;
             if (gm != null)
             {
                 var ws = gm.workStations;
-                MelonLogger.Msg($"[ArsonMod] workStations: {(ws != null ? $"{ws.Count} entries" : "NULL")}");
+                wsCount = ws?.Count ?? 0;
+                FileLogger.Log($"workStations: {wsCount} entries");
 
                 if (ws != null)
                 {
                     for (int i = 0; i < ws.Count; i++)
                     {
                         var station = ws[i];
-                        if (station == null) { MelonLogger.Msg($"[ArsonMod]   ws[{i}]: null"); continue; }
+                        if (station == null) continue;
                         var owner = station.ownerLobbyPlayer;
-                        if (owner == null) { MelonLogger.Msg($"[ArsonMod]   ws[{i}]: ownerLobbyPlayer=null"); continue; }
+                        if (owner == null) continue;
                         var lp = owner.GetComponent<LobbyPlayer>();
-                        if (lp == null) { MelonLogger.Msg($"[ArsonMod]   ws[{i}]: LobbyPlayer component=null"); continue; }
-                        MelonLogger.Msg($"[ArsonMod]   ws[{i}]: steamID={lp.steamID}, role={lp.playerRole}, isFired={lp.isFired}, playerController={(lp.playerController != null ? "exists" : "null")}");
+                        if (lp == null) continue;
+                        occupiedCount++;
+                        FileLogger.Log($"  ws[{i}]: steamID={lp.steamID}, role={lp.playerRole}");
                     }
                 }
             }
 
             var allLobbyPlayers = UnityEngine.Object.FindObjectsOfType<LobbyPlayer>();
-            MelonLogger.Msg($"[ArsonMod] FindObjectsOfType<LobbyPlayer>: {(allLobbyPlayers != null ? $"{allLobbyPlayers.Length} found" : "null")}");
+            int lobbyCount = allLobbyPlayers?.Length ?? 0;
+            FileLogger.Log($"FindObjectsOfType<LobbyPlayer>: {lobbyCount} found");
             if (allLobbyPlayers != null)
             {
                 foreach (var lp in allLobbyPlayers)
@@ -139,11 +144,12 @@ namespace ArsonMod.Core
                     if (lp == null) continue;
                     var ctrl = lp.playerController;
                     var pc = ctrl?.GetComponent<Il2CppPlayer.PlayerController>();
-                    MelonLogger.Msg($"[ArsonMod]   LobbyPlayer: steamID={lp.steamID}, role={lp.playerRole}, isFired={lp.isFired}, controller={(ctrl != null ? "exists" : "null")}, isLocal={(pc != null ? pc.isLocalPlayer.ToString() : "N/A")}");
+                    FileLogger.Log($"  LobbyPlayer: steamID={lp.steamID}, role={lp.playerRole}, isLocal={(pc != null ? pc.isLocalPlayer.ToString() : "N/A")}");
                 }
             }
 
-            MelonLogger.Msg("[ArsonMod] === End Player Diagnostics ===");
+            FileLogger.Log("=== End Player Diagnostics ===");
+            MelonLogger.Msg($"[ArsonMod] Players found: {lobbyCount} (workstations: {occupiedCount}/{wsCount})");
         }
 
         public static PlayerInfo? GetLocalPlayer()
